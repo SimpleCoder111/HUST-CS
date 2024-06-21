@@ -1,0 +1,65 @@
+fun printInt (a:int) =
+    print(Int.toString(a)^" ");
+
+fun getInt () =
+    Option.valOf (TextIO.scanStream (Int.scan StringCvt.DEC) TextIO.stdIn);
+    
+fun printIntList ( [] ) = ()
+  | printIntList ( x::xs ) = 
+    let
+	val tmp = printInt(x)
+    in
+	printIntList(xs)
+    end;
+
+fun getIntList ( 0 ) = []
+  | getIntList ( N:int) = getInt()::getIntList(N-1);
+
+fun split [ ]  = ([ ], [ ]) 
+    | split [x] = ([ ], [x])
+    | split (x::y::L) =
+	let val (A, B) =split L
+	in (x::A, y::B) 	
+	end;
+
+datatype tree = Empty | Br of tree * int * tree; 
+
+fun trav(Br(t1,a,t2)) = trav(t1)@(a::trav(t2))
+    |trav empty = [];
+
+fun listToTree ([] : int list) : tree = Empty
+  | listToTree (x::l) = let val (l1, l2) = split l
+    	in Br(listToTree l1, x, listToTree l2)
+  end;
+
+
+(*begin*)
+fun treecompare(Empty, Empty) = EQUAL
+  | treecompare(Empty, _) = LESS
+  | treecompare(_, Empty) = GREATER
+  | treecompare(Br(l1,x,r1), Br(l2,y,r2)) = 
+    if x < y then LESS
+    else if x > y then GREATER
+    else EQUAL
+
+fun SwapDown Empty = Empty
+  | SwapDown (Br(Empty, x, Empty)) = Br(Empty, x, Empty)
+  | SwapDown (Br(l, x, r)) =
+    case (l, r) of
+      (Br(l1, x1, r1), Br(l2, x2, r2)) =>
+        if x1 < x2 andalso x1 < x then Br(SwapDown(Br(l1, x, r1)), x1, Br(l2, x2, r2))
+        else if x2 < x1 andalso x2 < x then Br(Br(l1, x1, r1), x2, SwapDown(Br(l2, x, r2)))
+        else Br(l, x, r)
+    | (Br(l1, x1, r1), Empty) => Br(SwapDown(Br(l1, x, Empty)), x1, Empty)
+    | (Empty, Br(l2, x2, r2)) => Br(Empty, x2, SwapDown(Br(l2, x, Empty)))
+    | _ => Empty
+
+fun heapify Empty = Empty
+  | heapify (Br(Empty, x, Empty)) = Br(Empty, x, Empty)
+  | heapify (Br(l, x, r)) = SwapDown(Br(heapify l, x, heapify r))
+
+
+(*end*)
+
+val L = getIntList(7);
+printIntList (trav(heapify(listToTree L)));

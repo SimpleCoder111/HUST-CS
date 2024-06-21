@@ -1,0 +1,31 @@
+fun printInt (a:int) =
+    print(Int.toString(a)^" ");
+
+fun getInt () =
+    Option.valOf (TextIO.scanStream (Int.scan StringCvt.DEC) TextIO.stdIn);
+    
+fun printIntList ( [] ) = ()
+  | printIntList ( x::xs ) = 
+    let
+	val tmp = printInt(x)
+    in
+	printIntList(xs)
+    end;
+
+fun getIntList ( 0 ) = []
+  | getIntList ( N:int) = getInt()::getIntList(N-1);
+
+ 
+(*** Begin ***)
+fun interleave([], []) = []
+| interleave(x1::L, x2::R) = x1 :: x2 :: interleave(L, R)
+| interleave(L, []) = L
+| interleave([], R) = R
+
+
+(*****End*****)
+
+val L = getIntList(2);
+val R = getIntList(6);
+val O = interleave (L, R);
+printIntList(O); 
